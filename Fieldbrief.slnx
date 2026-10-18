@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Fieldbrief.Api/Fieldbrief.Api.csproj" />
+    <Project Path="src/Fieldbrief.Domain/Fieldbrief.Domain.csproj" />
+    <Project Path="src/Fieldbrief.Infrastructure/Fieldbrief.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Fieldbrief.UnitTests/Fieldbrief.UnitTests.csproj" />
+  </Folder>
+</Solution>
