@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fieldbrief
+      POSTGRES_USER: fieldbrief
+      POSTGRES_PASSWORD: fieldbrief
+    ports:
+      - "5433:5432"
+    volumes:
+      - fieldbrief_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fieldbrief -d fieldbrief"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Fieldbrief.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=fieldbrief;Username=fieldbrief;Password=fieldbrief
+    ports:
+      - "5081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./src/web
+      dockerfile: Dockerfile
+    ports:
+      - "4201:80"
+    depends_on:
+      - api
+
+volumes:
+  fieldbrief_pg:
