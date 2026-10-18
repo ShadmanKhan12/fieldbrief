@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+## Node / Angular
+node_modules/
+dist/
+.angular/
+*.log
+
+## Env / secrets
+.env
+*.pfx
+
+## OS
+.DS_Store
+Thumbs.db
+
+## IDE
+.idea/
+*.swp
