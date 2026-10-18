@@ -1,0 +1,152 @@
+@if (loading() && !engagement()) {
+  <p class="empty">Loading engagement…</p>
+} @else if (engagement(); as e) {
+  <section class="page">
+    <a routerLink="/engagements" class="back">← Engagements</a>
+
+    <header class="hero">
+      <div>
+        <div class="meta">
+          <span class="mono code">{{ e.code }}</span>
+          <span class="badge" [class]="statusClass(e.status)">{{ e.status }}</span>
+        </div>
+        <h1>{{ e.title }}</h1>
+        <p class="customer">{{ e.customerName }} · Owner {{ e.owner }}</p>
+      </div>
+      <div class="actions">
+        <button type="button" (click)="runAllChecks()" [disabled]="running()">
+          {{ running() ? 'Running…' : 'Run health checks' }}
+        </button>
+        <button type="button" class="secondary" (click)="reload()">Refresh</button>
+      </div>
+    </header>
+
+    @if (message()) {
+      <p class="banner">{{ message() }}</p>
+    }
+
+    <div class="brief panel">
+      <div>
+        <h2>Problem</h2>
+        <p>{{ e.problemStatement }}</p>
+      </div>
+      <div>
+        <h2>Desired outcome</h2>
+        <p>{{ e.desiredOutcome }}</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="panel block">
+        <h2>Customer systems</h2>
+        @for (sys of e.systems; track sys.id) {
+          <article class="system">
+            <header>
+              <strong>{{ sys.name }}</strong>
+              <span class="badge neutral">{{ sys.kind }}</span>
+              @if (sys.isCritical) {
+                <span class="badge warning">critical</span>
+              }
+            </header>
+            <p class="mono muted url">{{ sys.baseUrl }}</p>
+            @if (sys.notes) {
+              <p class="muted">{{ sys.notes }}</p>
+            }
+            <ul class="checks">
+              @for (check of sys.healthChecks; track check.id) {
+                <li>
+                  <div>
+                    <span class="mono">{{ check.method }} {{ check.path }}</span>
+                    <div class="muted small">{{ check.name }} · expect {{ check.expectedStatusCode }}</div>
+                    @if (check.lastResult; as r) {
+                      <div class="result" [class.ok]="r.passed" [class.fail]="!r.passed">
+                        {{ r.passed ? 'Pass' : 'Fail' }}
+                        · {{ r.statusCode ?? '—' }}
+                        · {{ r.durationMs }}ms
+                        · {{ r.ranAt | date: 'short' }}
+                        @if (r.error) {
+                          <span> — {{ r.error }}</span>
+                        }
+                      </div>
+                    } @else {
+                      <div class="muted small">No run yet</div>
+                    }
+                  </div>
+                  <button type="button" class="secondary small-btn" (click)="runOne(check.id)">Run</button>
+                </li>
+              }
+            </ul>
+          </article>
+        }
+      </section>
+
+      <section class="panel block">
+        <h2>Checklist</h2>
+        <ul class="checklist">
+          @for (item of e.checklist; track item.id) {
+            <li>
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="item.isDone"
+                  (change)="toggleItem(item.id, $any($event.target).checked)"
+                />
+                <span [class.done]="item.isDone">{{ item.title }}</span>
+              </label>
+              <span class="badge neutral">{{ item.phase }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="panel block">
+        <h2>Field decisions</h2>
+        <div class="form">
+          <input [(ngModel)]="decisionTitle" placeholder="Title" />
+          <textarea [(ngModel)]="decisionContext" rows="2" placeholder="Context"></textarea>
+          <textarea [(ngModel)]="decisionText" rows="2" placeholder="Decision"></textarea>
+          <textarea [(ngModel)]="decisionConsequences" rows="2" placeholder="Consequences"></textarea>
+          <label class="check-row">
+            <input type="checkbox" [(ngModel)]="feedBackToProduct" />
+            Feed back to product
+          </label>
+          <button type="button" (click)="addDecision()">Log decision</button>
+        </div>
+        @for (d of e.decisions; track d.id) {
+          <article class="decision">
+            <header>
+              <strong>{{ d.title }}</strong>
+              @if (d.feedBackToProduct) {
+                <span class="badge warning">product feedback</span>
+              }
+            </header>
+            <p>{{ d.decision }}</p>
+            @if (d.context) {
+              <p class="muted small"><strong>Context:</strong> {{ d.context }}</p>
+            }
+            @if (d.consequences) {
+              <p class="muted small"><strong>Consequences:</strong> {{ d.consequences }}</p>
+            }
+            <p class="muted small">{{ d.madeBy }} · {{ d.madeAt | date: 'medium' }}</p>
+          </article>
+        }
+      </section>
+
+      <section class="panel block">
+        <h2>Field notes</h2>
+        <div class="form">
+          <textarea [(ngModel)]="noteBody" rows="3" placeholder="What happened on-site…"></textarea>
+          <button type="button" (click)="addNote()">Add note</button>
+        </div>
+        @for (n of e.notes; track n.id) {
+          <article class="note">
+            <p>{{ n.body }}</p>
+            <p class="muted small">{{ n.author }} · {{ n.createdAt | date: 'medium' }}</p>
+          </article>
+        }
+      </section>
+    </div>
+  </section>
+}

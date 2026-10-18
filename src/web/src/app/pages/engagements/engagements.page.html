@@ -1,0 +1,52 @@
+<section class="page">
+  <header class="page-head">
+    <div>
+      <h1>Engagements</h1>
+      <p class="muted">Active customer workspaces for field deployment.</p>
+    </div>
+    <button type="button" class="secondary" (click)="load()" [disabled]="loading()">Refresh</button>
+  </header>
+
+  @if (error()) {
+    <p class="error-banner">{{ error() }}</p>
+  }
+
+  @if (loading() && items().length === 0) {
+    <p class="empty">Loading engagements…</p>
+  } @else if (items().length === 0) {
+    <p class="empty">No engagements yet. Start the API with Postgres so the demo seed can load.</p>
+  } @else {
+    <div class="panel table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Customer</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Owner</th>
+            <th>Systems</th>
+            <th>Open checks</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>
+                <a [routerLink]="['/engagements', item.id]" class="mono">{{ item.code }}</a>
+              </td>
+              <td>{{ item.customerName }}</td>
+              <td>{{ item.title }}</td>
+              <td><span class="badge" [class]="statusClass(item.status)">{{ item.status }}</span></td>
+              <td>{{ item.owner }}</td>
+              <td>{{ item.systemCount }}</td>
+              <td>{{ item.openChecklistCount }}</td>
+              <td class="muted">{{ item.updatedAt | date: 'medium' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
